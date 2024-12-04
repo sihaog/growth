@@ -71,6 +71,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #e9ecef; /* Light gray for result display */
+            display: none;  /* Hide the result initially */
         }
     </style>
 </head>
@@ -98,6 +99,10 @@
         <button onclick="calculatePercentile()">Calculate Percentile</button>
 
         <div id="result"></div>
+        <p>Source</p>
+        <p>WS/T 423-2022 《7岁以下儿童生长标准》</p>
+        <p>2005年九省/市儿童体格发育调查数据，中华儿科杂志，2009年7期</p>
+
     </div>
 
     <script>
@@ -205,8 +210,9 @@
 
             console.log(heightPercentile, weightPercentile);
 
-            document.getElementById('result').innerHTML = `
-                Height Percentile: ${determinePercentileRange(heightPercentile, closestAge.height)}<br>
+            const resultElement = document.getElementById('result');
+            resultElement.style.display = 'block';
+            resultElement.innerHTML = `                Height Percentile: ${determinePercentileRange(heightPercentile, closestAge.height)}<br>
                 Weight Percentile: ${determinePercentileRange(weightPercentile, closestAge.weight)}
             `;
         }
