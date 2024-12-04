@@ -6,50 +6,82 @@
     <title>Child Growth Percentile Calculator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f0f8ff; /* Light blue background for a friendly look */
         }
+
         .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        label, input {
-            display: block;
-            margin-bottom: 10px;
-        }
-        input[type="number"] {
+            background: #ffffff;
+            padding: 30px;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        input[type="number"], select {
+            width: calc(100% - 16px);
             padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             box-sizing: border-box;
         }
+
         button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
+            background-color: #4CAF50; /* Green */
             color: white;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
         }
+
         button:hover {
-            background-color: #218838;
+            background-color: #45a049;
         }
+
         #result {
             margin-top: 20px;
             font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #e9ecef; /* Light gray for result display */
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Child Growth Percentile Calculator</h1>
+        <label for="sex">Sex:</label>
+        <select id="sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
         
         <label for="ageYears">Age (Years):</label>
         <input type="number" id="ageYears" min="0" max="18" required>
@@ -85,11 +117,12 @@
             }
         }
 
-        function findClosestAge(data, ageTotalMonths) {
-            let closestAge = data[0];
-            let smallestDiff = Math.abs(data[0].age - ageTotalMonths);
+        function findClosestAge(data, sex, ageTotalMonths) {
+            let sexData = data[sex];
+            let closestAge = sexData[0];
+            let smallestDiff = Math.abs(sexData[0].age - ageTotalMonths);
 
-            for (let entry of data) {
+            for (let entry of sexData) {
                 let diff = Math.abs(entry.age - ageTotalMonths);
                 if (diff < smallestDiff) {
                     smallestDiff = diff;
@@ -98,38 +131,56 @@
             }
             return closestAge;
         }
-        
-        function determinePercentileRange(value, percentileData) {
-            const ranges = [
-                { label: '<P3', range: [0, 3] },
-                { label: '=P3', range: [3, 3] },
-                { label: 'P3-10', range: [3, 10] },
-                { label: '=P10', range: [10, 10] },
-                { label: 'P10-25', range: [10, 25] },
-                { label: '=P25', range: [25, 25] },
-                { label: 'P25-50', range: [25, 50] },
-                { label: '=P50', range: [50, 50] },
-                { label: 'P50-75', range: [50, 75] },
-                { label: '=P75', range: [75, 75] },
-                { label: 'P75-90', range: [75, 90] },
-                { label: '=P90', range: [90, 90] },
-                { label: 'P90-97', range: [90, 97] },
-                { label: '=P97', range: [97, 97] },
-                { label: '>P97', range: [97, 100] }
-            ];
-            
-            for (const range of ranges) {
-                if (value >= range.range[0] && value <= range.range[1]) {
-                    if (value < 3) {
-                        return `<P3 (${percentileData[0]})`;
-                    }
-                    if (value > 97) {
-                        return `>P97 (${percentileData[percentileData.length - 1]})`;
-                    }
-                    return range.label;
+
+        function findPercentile(value, percentileData) {
+            if (value <= percentileData[0]) return 0; // Below or at P3
+            if (value >= percentileData[percentileData.length - 1]) return 100; // Above or at P97
+
+            // Define the percentiles we have data for
+            const percentiles = [3, 10, 25, 50, 75, 90, 97];
+
+            for (let i = 0; i < percentileData.length - 1; i++) {
+                if (value > percentileData[i] && value <= percentileData[i + 1]) {
+                    // Linear interpolation between percentiles
+                    const lowerValue = percentileData[i];
+                    const upperValue = percentileData[i + 1];
+                    const lowerPercentile = percentiles[i];
+                    const upperPercentile = percentiles[i + 1];
+                    
+                    // Calculate the fraction between the two percentiles
+                    const fraction = (value - lowerValue) / (upperValue - lowerValue);
+                    
+                    // Interpolate the percentile
+                    return lowerPercentile + fraction * (upperPercentile - lowerPercentile);
                 }
             }
-            return "Unknown";
+
+            // This return should not occur if the data is consistent with the percentiles provided
+            return 0;
+        }
+
+        function determinePercentileRange(value, referenceData) {
+            // return absolute value for the cloest percentile
+            if (value < 3) {
+                console.log(value, referenceData[0]);
+                return `&lt;P3 (${referenceData[0]})`
+            };
+            if (value > 97) {
+                console.log(value, referenceData[referenceData.length - 1]);
+                return `&gt;P97 (${referenceData[referenceData.length - 1]})`
+            };
+
+            const percentileSteps = [3, 10, 25, 50, 75, 90, 97];
+            
+            for (let i = 0; i < percentileSteps.length - 1; i++) {
+                if (value > percentileSteps[i] && value < percentileSteps[i + 1]) {
+                    return `P${percentileSteps[i]}-${percentileSteps[i + 1]}`;
+                }
+                if (value === percentileSteps[i]) {
+                    return `=P${percentileSteps[i]}`;
+                }
+            }
+            return "Unknown"; // This should not occur if the data is consistent
         }
 
         async function calculatePercentile() {
@@ -138,18 +189,21 @@
                 document.getElementById('result').innerText = "Failed to load growth data.";
                 return;
             }
-
+            const sex = document.getElementById('sex').value;
             const ageYears = parseInt(document.getElementById('ageYears').value);
             const ageMonths = parseInt(document.getElementById('ageMonths').value);
             const height = parseFloat(document.getElementById('height').value);
             const weight = parseFloat(document.getElementById('weight').value);
 
             const totalMonths = (ageYears * 12) + ageMonths;
-            const closestAge = findClosestAge(data, totalMonths);
+            const closestAge = findClosestAge(data, sex, totalMonths);
+            console.log(closestAge);
+            
+            // Find the percentile for height and weight
+            const heightPercentile = findPercentile(height, closestAge.height);
+            const weightPercentile = findPercentile(weight, closestAge.weight);
 
-            // Here we simply find the percentile bracket
-            const heightPercentile = closestAge.height.findIndex(p => p >= height) * 25; // This is a very rough approximation for demonstration
-            const weightPercentile = closestAge.weight.findIndex(p => p >= weight) * 25; // Same for weight
+            console.log(heightPercentile, weightPercentile);
 
             document.getElementById('result').innerHTML = `
                 Height Percentile: ${determinePercentileRange(heightPercentile, closestAge.height)}<br>
