@@ -1,0 +1,13 @@
+[
+    {
+        "age": 12, // Age in months
+        "height": [90, 95, 100, 105, 110, 115, 120], // Heights at 3rd, 10th, 25th, 50th, 75th, 90th, and 97th percentiles
+        "weight": [15, 17, 19, 21, 23, 25, 27] // Weights at similar percentiles
+    },
+    {
+        "age": 24, // Another age entry
+        "height": [95, 100, 106, 112, 118, 124, 130],
+        "weight": [17, 19, 21, 23, 25, 27, 29]
+    }
+    // Add more entries for different ages
+]

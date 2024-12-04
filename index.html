@@ -69,20 +69,63 @@
     </div>
 
     <script>
-        function calculatePercentile() {
-            const ageYears = document.getElementById('ageYears').value;
-            const ageMonths = document.getElementById('ageMonths').value;
-            const height = document.getElementById('height').value;
-            const weight = document.getElementById('weight').value;
+        // Previous functions remain the same
 
-            // Here we would normally use charts or data to calculate percentiles
-            // For demonstration, we'll use dummy data:
-            let heightPercentile = 50; // This would be calculated based on charts
-            let weightPercentile = 50; // This would be calculated based on charts
+        function determinePercentileRange(value, percentileData) {
+            const ranges = [
+                { label: '<P3', range: [0, 3] },
+                { label: '=P3', range: [3, 3] },
+                { label: 'P3-10', range: [3, 10] },
+                { label: '=P10', range: [10, 10] },
+                { label: 'P10-25', range: [10, 25] },
+                { label: '=P25', range: [25, 25] },
+                { label: 'P25-50', range: [25, 50] },
+                { label: '=P50', range: [50, 50] },
+                { label: 'P50-75', range: [50, 75] },
+                { label: '=P75', range: [75, 75] },
+                { label: 'P75-90', range: [75, 90] },
+                { label: '=P90', range: [90, 90] },
+                { label: 'P90-97', range: [90, 97] },
+                { label: '=P97', range: [97, 97] },
+                { label: '>P97', range: [97, 100] }
+            ];
+            
+            for (const range of ranges) {
+                if (value >= range.range[0] && value <= range.range[1]) {
+                    if (value < 3) {
+                        return `<P3 (${percentileData[0]})`;
+                    }
+                    if (value > 97) {
+                        return `>P97 (${percentileData[percentileData.length - 1]})`;
+                    }
+                    return range.label;
+                }
+            }
+            return "Unknown";
+        }
+
+        async function calculatePercentile() {
+            const data = await loadData();
+            if (!data) {
+                document.getElementById('result').innerText = "Failed to load growth data.";
+                return;
+            }
+
+            const ageYears = parseInt(document.getElementById('ageYears').value);
+            const ageMonths = parseInt(document.getElementById('ageMonths').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+
+            const totalMonths = (ageYears * 12) + ageMonths;
+            const closestAge = findClosestAge(data, totalMonths);
+
+            // Here we simply find the percentile bracket
+            const heightPercentile = closestAge.height.findIndex(p => p >= height) * 25; // This is a very rough approximation for demonstration
+            const weightPercentile = closestAge.weight.findIndex(p => p >= weight) * 25; // Same for weight
 
             document.getElementById('result').innerHTML = `
-                Height Percentile: ${heightPercentile}th percentile<br>
-                Weight Percentile: ${weightPercentile}th percentile
+                Height Percentile: ${determinePercentileRange(heightPercentile, closestAge.height)}<br>
+                Weight Percentile: ${determinePercentileRange(weightPercentile, closestAge.weight)}
             `;
         }
     </script>
