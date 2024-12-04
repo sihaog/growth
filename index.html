@@ -69,8 +69,36 @@
     </div>
 
     <script>
-        // Previous functions remain the same
+        let growthData = null;
+        
+        async function loadData() {
+            if (growthData) return growthData; // If already loaded, return it
+            
+            try {
+                const response = await fetch('growth_data.json');
+                growthData = await response.json();
+                return growthData;
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('result').innerText = "Failed to load growth data.";
+                return null;
+            }
+        }
 
+        function findClosestAge(data, ageTotalMonths) {
+            let closestAge = data[0];
+            let smallestDiff = Math.abs(data[0].age - ageTotalMonths);
+
+            for (let entry of data) {
+                let diff = Math.abs(entry.age - ageTotalMonths);
+                if (diff < smallestDiff) {
+                    smallestDiff = diff;
+                    closestAge = entry;
+                }
+            }
+            return closestAge;
+        }
+        
         function determinePercentileRange(value, percentileData) {
             const ranges = [
                 { label: '<P3', range: [0, 3] },
