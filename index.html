@@ -73,6 +73,20 @@
             background-color: #e9ecef; /* Light gray for result display */
             display: none;  /* Hide the result initially */
         }
+        #sources {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        #sources p:first-child {
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        #sources p {
+            font-size: 0.8em;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -99,10 +113,11 @@
         <button onclick="calculatePercentile()">Calculate Percentile</button>
 
         <div id="result"></div>
-        <p>Source</p>
-        <p>WS/T 423-2022 《7岁以下儿童生长标准》</p>
-        <p>2005年九省/市儿童体格发育调查数据，中华儿科杂志，2009年7期</p>
-
+        <div id="sources" style="margin-top: 20px; font-size: 0.9em; color: #666;">
+            <p>Data source:</p>
+            <p>WS/T 423-2022 《7岁以下儿童生长标准》</p>
+            <p>2005年九省/市儿童体格发育调查数据，中华儿科杂志，2009年7期</p>
+        </div>
     </div>
 
     <script>
